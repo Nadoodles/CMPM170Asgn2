@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Como</title>
+    <meta name="viewport" content="width=device-width, height=device-height, user-scalable=no, initial-scale=1, maximum-scale=1" />
+    <script src="https://unpkg.com/sounds-some-sounds@3.0.0/build/index.js"></script>
+    <script src="https://unpkg.com/gif-capture-canvas@1.1.0/build/index.js"></script>
+    <script src="https://unpkg.com/pixi.js@5.3.0/dist/pixi.min.js"></script>
+    <script src="https://unpkg.com/pixi-filters@3.1.1/dist/pixi-filters.js"></script>
+    <script src="https://unpkg.com/crisp-game-lib@1.1.1/docs/bundle.js"></script>
+
+    <script>
+        title = "Como";
+
+        description = `<div style="text-align: center;">Click to stop box from falling, avoid bullets</div>`;
+
+
+        characters = [
+            `
+            `
+        ];
+
+        let current_score = 0; 
+
+        const G = {
+            WIDTH: 100,
+            HEIGHT: 150,
+        };
+
+        const box = {
+            x: 10, // Placed at the far left side
+            y: 0, // Start at the top
+            size: 10,
+            color: "blue",
+            jumpForce: 2,
+            isJumping: true,
+        };
+
+        const movingBox = {
+            x: G.WIDTH - 10, // Start on the right side
+            y: 0,
+            size: 10,
+            color: "red",
+            speed: 1, // Adjust the speed of vertical movement
+            goingDown: true, // Initially moving downwards
+        };
+
+        const bullets = []; // Array to store bullets
+
+        options = {
+            viewSize: { x: G.WIDTH, y: G.HEIGHT },
+            theme: "shapeDark",
+            isPlayingBgm: true,
+            isReplayEnabled: true,
+            seed: 8,
+        };
+
+        function update() {
+
+            if (current_score % 10 == 0) {
+                addScore(1); 
+            }
+            current_score += 1; 
+
+            if (box.isJumping) {
+                box.y += box.jumpForce; // Box falls down
+            }
+
+            if (input.isPressed) {
+                box.isJumping = true;
+                box.y -= box.jumpForce;
+            }
+
+            color("blue"); // Set background color
+            boxChar(box.x, box.y, box.size);
+
+            // Moving the second box up and down
+            if (movingBox.goingDown) {
+                movingBox.y += movingBox.speed;
+                if (movingBox.y + movingBox.size >= G.HEIGHT) {
+                    movingBox.goingDown = false;
+                }
+            } else {
+                movingBox.y -= movingBox.speed;
+                if (movingBox.y <= 0) {
+                    movingBox.goingDown = true;
+                }
+            }
+
+            color("red");
+            boxChar(movingBox.x, movingBox.y, movingBox.size);
+
+            // Shooting bullets towards the blue box
+            if (Math.random() < 0.05) {
+                bullets.push({
+                    x: movingBox.x,
+                    y: movingBox.y,
+                    size: 4,
+                    color: "yellow",
+                    targetX: box.x, // Adjust the target position
+                    targetY: box.y,
+                });
+            }
+
+            // Move and render bullets
+            for (let i = 0; i < bullets.length; i++) {
+                const bullet = bullets[i];
+                color(bullet.color);
+                boxChar(bullet.x, bullet.y, bullet.size);
+
+                // Move bullets towards the left
+                bullet.x -= 2; // Adjust the speed as needed
+
+                // Remove bullets if they go off the screen
+                if (bullet.x <= 0) {
+                    bullets.splice(i, 1);
+                    continue; // Move to the next bullet to avoid index issues
+                }
+
+                // Check for collision with blue box
+                bullets.forEach(bullet => {
+                if (
+                    bullet.x + bullet.size / 2 >= box.x - box.size / 2 &&
+                    bullet.x - bullet.size / 2 <= box.x + box.size / 2 &&
+                    bullet.y + bullet.size / 2 >= box.y - box.size / 2 &&
+                    bullet.y - bullet.size / 2 <= box.y + box.size / 2
+                ) {
+
+                    console.log("Blue box hit by bullet!");
+                    current_score = 0; 
+                    end(); 
+                    // Handle collision logic here (like game over or reducing health, etc.)
+                }
+            });
+
+            }
+
+            if (box.y + box.size / 2 >= G.HEIGHT) {
+                // Box touches the bottom of the screen
+                box.y = 0; // Reset box position to top of screen
+            }
+        }
+
+        function boxChar(x, y, size) {
+            rect(x - size / 2, y - size / 2, size, size);
+        }
+
+        addEventListener("load", onLoad);
+    </script>
+</head>
+<body style="background: #3498db"></body>
+</html>
