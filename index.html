@@ -13,7 +13,7 @@
     <script>
         title = "Joy Flappy";
 
-        description = "Click Box";
+        description = `Click stop Box`;
 
 
         characters = [
@@ -129,6 +129,7 @@
 
                     console.log("Blue box hit by bullet!");
                     current_score = 0; 
+                    play("laser")
                     end(); 
                     // Handle collision logic here (like game over or reducing health, etc.)
                 }
